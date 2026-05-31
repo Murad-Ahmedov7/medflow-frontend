@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* Progress bar — uses ::before to avoid conflict with Sonner's internal ::after gap bridge */
+[data-sonner-toast]::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  border-radius: 0 0 12px 12px;
+  transform-origin: left;
+  animation: toast-progress 5s linear forwards;
+}
+
+[data-sonner-toast]:hover::before {
+  animation-play-state: paused;
+}
+
+[data-sonner-toast][data-type='success']::before { background: #22c55e; }
+[data-sonner-toast][data-type='error']::before   { background: #ef4444; }
+[data-sonner-toast][data-type='warning']::before { background: #f59e0b; }
+[data-sonner-toast][data-type='info']::before    { background: #06b6d4; }
+[data-sonner-toast][data-type='default']::before { background: #06b6d4; }
+
+/* Close button — top-right, clearly visible */
+[data-sonner-toast] [data-close-button] {
+  left: unset !important;
+  right: 6px !important;
+  top: 6px !important;
+  transform: none !important;
+  opacity: 1 !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  background: rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: currentColor !important;
+}
+[data-sonner-toast] [data-close-button]:hover {
+  background: rgba(0, 0, 0, 0.22) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+
+  .dark body {
+    background-color: #020617;
+    color: #f1f5f9;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}

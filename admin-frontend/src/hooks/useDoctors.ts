@@ -4,9 +4,10 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { doctorService } from '../services/doctor.service';
 import { departmentService } from '../services/department.service';
-import { extractErrorMessage } from '../utils/errorHandler';
+import { extractErrorMessage, sanitizeApiMessage } from '../utils/errorHandler';
 import type { CreateDoctorRequest, DoctorsQuery, UpdateDoctorRequest } from '../types/doctor.types';
 import type { ExportDoctorsParams } from '../types/doctor.types';
+import type { CreateDepartmentRequest, UpdateDepartmentRequest } from '../types/department.types';
 
 export function useDoctors(query: DoctorsQuery = {}) {
   return useQuery({
@@ -39,6 +40,77 @@ export function useDepartments() {
   });
 }
 
+export function useDepartmentsRaw() {
+  return useQuery({
+    queryKey: ['departments'],
+    queryFn: departmentService.getAll,
+  });
+}
+
+export function useCreateDepartment() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: (data: CreateDepartmentRequest) => departmentService.create(data),
+    onSuccess: (result) => {
+      if (!result.isSuccess) {
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('departments.createError'));
+        return;
+      }
+      toast.success(t('departments.createSuccess'));
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['doctor-stats'] });
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
+    },
+  });
+}
+
+export function useUpdateDepartment() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateDepartmentRequest }) =>
+      departmentService.update(id, data),
+    onSuccess: (result) => {
+      if (!result.isSuccess) {
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('departments.updateError'));
+        return;
+      }
+      toast.success(t('departments.updateSuccess'));
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
+    },
+  });
+}
+
+export function useDeleteDepartment() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: (id: string) => departmentService.delete(id),
+    onSuccess: (result) => {
+      if (!result.isSuccess) {
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('departments.deleteError'));
+        return;
+      }
+      toast.success(t('departments.deleteSuccess'));
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctor-stats'] });
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
+    },
+  });
+}
+
 export function useCreateDoctor() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -48,7 +120,7 @@ export function useCreateDoctor() {
     mutationFn: (data: CreateDoctorRequest) => doctorService.create(data),
     onSuccess: (result) => {
       if (!result.isSuccess) {
-        toast.error(result.errors?.[0] ?? t('doctors.createError'));
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('doctors.createError'));
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['doctors'] });
@@ -71,7 +143,7 @@ export function useUpdateDoctor() {
       doctorService.update(id, data),
     onSuccess: (result, { id }) => {
       if (!result.isSuccess) {
-        toast.error(result.errors?.[0] ?? t('doctors.updateError'));
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('doctors.updateError'));
         return;
       }
       toast.success(t('doctors.updateSuccess'));
@@ -119,7 +191,7 @@ export function useToggleDoctorStatus() {
     mutationFn: (id: string) => doctorService.toggleStatus(id),
     onSuccess: (result) => {
       if (!result.isSuccess) {
-        toast.error(result.errors?.[0] ?? t('common.error'));
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('common.error'));
         return;
       }
       toast.success(result.data ? t('doctors.activated') : t('doctors.deactivated'));
@@ -141,7 +213,7 @@ export function useUploadDoctorPhoto() {
       doctorService.uploadPhoto(id, file),
     onSuccess: (result, { id }) => {
       if (!result.isSuccess) {
-        toast.error(result.errors?.[0] ?? t('doctors.uploadError'));
+        toast.error(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : t('doctors.uploadError'));
         return;
       }
       toast.success(t('doctors.uploadSuccess'));

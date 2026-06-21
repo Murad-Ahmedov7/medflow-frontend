@@ -9,6 +9,7 @@ export interface ApiListResult<T> {
   errors: string[] | null;
   data: T[];
   totalCount: number;
+  pagedTotalCount: number;
 }
 
 export interface ApiError {

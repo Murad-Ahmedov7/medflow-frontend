@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { patientProfileService } from '../services/patientProfile.service';
-import { extractErrorMessage } from '../utils/errorHandler';
+import { extractErrorMessage, sanitizeApiMessage } from '../utils/errorHandler';
 import { showToast } from '../utils/toast';
 import type { UpdateMyPatientProfileRequest } from '../types/patient.types';
 
 export const PROFILE_QUERY_KEY = ['patient', 'me'];
 
-export function useMyPatientProfile() {
+export function useMyPatientProfile(enabled = true) {
   return useQuery({
     queryKey: PROFILE_QUERY_KEY,
     queryFn: async () => {
@@ -17,6 +17,7 @@ export function useMyPatientProfile() {
       return result.data;
     },
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 }
 
@@ -26,7 +27,7 @@ export function useUpdateMyPatientProfile() {
     mutationFn: (data: UpdateMyPatientProfileRequest) =>
       patientProfileService.updateMyProfile(data),
     onSuccess: (result) => {
-      if (!result.isSuccess) { showToast.apiError(result.errors?.[0] ?? 'Update failed.'); return; }
+      if (!result.isSuccess) { showToast.apiError(sanitizeApiMessage(result.errors?.[0])); return; }
       queryClient.setQueryData(PROFILE_QUERY_KEY, result.data);
       showToast.profileSaved();
     },
@@ -39,7 +40,7 @@ export function useUploadProfilePhoto() {
   return useMutation({
     mutationFn: (file: File) => patientProfileService.uploadPhoto(file),
     onSuccess: (result) => {
-      if (!result.isSuccess) { showToast.apiError(result.errors?.[0] ?? 'Upload failed.'); return; }
+      if (!result.isSuccess) { showToast.apiError(sanitizeApiMessage(result.errors?.[0])); return; }
       queryClient.setQueryData(PROFILE_QUERY_KEY, result.data);
       showToast.photoUploaded();
     },

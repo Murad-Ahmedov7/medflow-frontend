@@ -34,8 +34,9 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       const refresh = tokenStorage.getRefreshToken();
       if (!refresh || isTokenExpired(refresh)) {
+        const hadSession = !!useAuthStore.getState().user;
         useAuthStore.getState().logout();
-        showToast.sessionExpired();
+        if (hadSession) showToast.sessionExpired();
         return Promise.reject(error);
       }
       if (isRefreshing) {

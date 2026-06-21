@@ -4,11 +4,13 @@ export interface ApiResult<T> {
   data: T | null;
 }
 
+// Backend ListResult<T> — used by doctor/department list endpoints
 export interface ApiListResult<T> {
   isSuccess: boolean;
   errors: string[] | null;
-  items: T[];
+  data: T[];
   totalCount: number;
+  pagedTotalCount: number;
 }
 
 export interface ApiError {

@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
 import { useAuthStore } from '../store/authStore';
-import { extractErrorMessage } from '../utils/errorHandler';
+import { extractErrorMessage, sanitizeApiMessage } from '../utils/errorHandler';
 import { showToast } from '../utils/toast';
 import { parseJwt } from '../utils/token';
 import i18n from '../i18n';
@@ -80,7 +80,7 @@ export function useResetPassword() {
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
     onSuccess: (result) => {
       if (!result.isSuccess) {
-        showToast.apiError(result.errors?.[0] ?? i18n.t('toast.resetFailed'));
+        showToast.apiError(result.errors?.[0] ? sanitizeApiMessage(result.errors[0]) : i18n.t('toast.resetFailed'));
         return;
       }
       showToast.resetPasswordSuccess();

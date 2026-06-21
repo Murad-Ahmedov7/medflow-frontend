@@ -47,4 +47,61 @@ export const API_ENDPOINTS = {
   payments: {
     base: '/api/payment',
   },
+  chat: {
+    base: '/api/chat',
+    messages: (chatId: string) => `/api/chat/${chatId}/messages`,
+    read: (chatId: string) => `/api/chat/${chatId}/read`,
+    getOrCreate: '/api/chat/get-or-create',
+    support: '/api/chat/support',
+    internal: '/api/chat/internal',
+  },
+  examinations: {
+    byId: (id: string) => `/api/examination/${id}`,
+  },
+  prescriptions: {
+    base: '/api/prescription',
+    byId: (id: string) => `/api/prescription/${id}`,
+    items: (id: string) => `/api/prescription/${id}/items`,
+  },
+  medicines: {
+    base: '/api/medicine',
+    byId: (id: string) => `/api/medicine/${id}`,
+    toggleAvailability: (id: string) => `/api/medicine/${id}/availability`,
+    updateSellingPrice: (id: string) => `/api/medicine/${id}/selling-price`,
+  },
+  suppliers: {
+    base: '/api/suppliers',
+    byId: (id: string) => `/api/suppliers/${id}`,
+    catalogue: (supplierId: string) => `/api/suppliers/${supplierId}/catalogue`,
+    catalogueItem: (supplierId: string, medicineId: string) => `/api/suppliers/${supplierId}/catalogue/${medicineId}`,
+    purchase: (supplierId: string) => `/api/suppliers/${supplierId}/purchase`,
+  },
+  stock: {
+    base: '/api/stock',
+    publish: (medicineId: string) => `/api/stock/${medicineId}/publish`,
+  },
+  balance: {
+    base: '/api/balance',
+    transactions: '/api/balance/transactions',
+    checkout: '/api/balance/checkout',
+    session: (sessionId: string) => `/api/balance/session/${sessionId}`,
+    fulfillSession: (sessionId: string) => `/api/balance/fulfill-session/${sessionId}`,
+  },
+  feedback: {
+    base: '/api/feedback',
+    byId: (id: string) => `/api/feedback/${id}`,
+    status: (id: string) => `/api/feedback/${id}/status`,
+  },
+  // Endpoint key renamed to medicineOrders for UI consistency; the URL path itself
+  // stays /api/pharmacy-orders — it's the backend's wire contract, shared with
+  // patient-frontend, and out of scope for this UI-only terminology rename.
+  medicineOrders: {
+    base: '/api/pharmacy-orders',
+    status: (id: string) => `/api/pharmacy-orders/${id}/status`,
+  },
+  signalR: {
+    chat: '/hubs/chat',
+    stock: '/hubs/stock',
+    feedback: '/hubs/feedback',
+  },
 } as const;

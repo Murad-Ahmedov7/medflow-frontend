@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '../components/ui/Button';
 import {
-  ArrowRight, Shield, Clock, Star,
+  Shield, Clock, Star,
   CalendarCheck, Users, Building2, HeartPulse,
-  Stethoscope, CheckCircle2, ChevronRight,
+  Stethoscope, CheckCircle2,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -82,20 +80,6 @@ export function HomePage() {
               <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 max-w-lg">
                 {t('home.heroSubtitle')}
               </p>
-
-              {/* CTA buttons */}
-              <div className="flex flex-wrap gap-3 mb-12">
-                <Link to="/sign-up">
-                  <Button size="lg" className="gap-2 shadow-lg shadow-cyan-500/25">
-                    {t('home.bookAppointment')} <ArrowRight size={17} />
-                  </Button>
-                </Link>
-                <Link to="/doctors">
-                  <Button variant="outline" size="lg" className="gap-2">
-                    {t('home.findDoctors')} <ChevronRight size={16} />
-                  </Button>
-                </Link>
-              </div>
 
               {/* Stats row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

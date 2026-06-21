@@ -4,13 +4,14 @@ import { NavLink, Outlet } from 'react-router-dom';
 import logoIcon from '../assets/branding/medflow_logo_only.png';
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Calendar, Users, FileText, Pill,
-  Settings, LogOut, Menu, X, Bell, ChevronDown,
+  LayoutDashboard, Calendar, Users, Pill,
+  Settings, LogOut, Menu, X, Bell, ChevronDown, MessageCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../store/authStore';
 import { useLogout } from '../hooks/useAuth';
+import { useChatHub } from '../hooks/useChatHub';
 import { ThemeSwitcher } from '../components/layout/ThemeSwitcher';
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
 
@@ -22,8 +23,8 @@ const BAR_H = 'h-14';
 const navItems = [
   { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
   { to: '/appointments', icon: Calendar, labelKey: 'nav.appointments' },
+  { to: '/chat', icon: MessageCircle, labelKey: 'nav.chat' },
   { to: '/patients', icon: Users, labelKey: 'nav.patients' },
-  { to: '/prescriptions', icon: FileText, labelKey: 'nav.prescriptions' },
   { to: '/medicines', icon: Pill, labelKey: 'nav.medicines' },
 ];
 
@@ -215,6 +216,10 @@ export function DashboardLayout() {
     try { return localStorage.getItem(COLLAPSE_KEY) === 'true'; } catch { return false; }
   });
   const { user } = useAuthStore();
+  const { t } = useTranslation();
+  // Keep SignalR connected for the entire authenticated session so
+  // NewMessage events arrive regardless of which page the doctor is on.
+  useChatHub(user?.id);
 
   useEffect(() => {
     try { localStorage.setItem(COLLAPSE_KEY, String(collapsed)); } catch { /* ignore */ }
@@ -315,8 +320,6 @@ export function DashboardLayout() {
 
           <div className="flex items-center gap-0.5 pr-4">
             <button className="relative flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
-              <Bell size={17} />
-              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-cyan-500" />
             </button>
             <LanguageSwitcher />
             <ThemeSwitcher />
@@ -327,8 +330,8 @@ export function DashboardLayout() {
                   {user?.fullName?.[0]?.toUpperCase() ?? 'D'}
                 </span>
               </span>
-              <span className="hidden sm:block text-sm font-medium max-w-24 truncate">{user?.fullName ?? 'Doctor'}</span>
-              <ChevronDown size={14} className="text-slate-400 shrink-0" />
+              <span className="hidden sm:block text-sm font-medium ">{user?.fullName ?? 'Doctor'}</span>
+
             </button>
           </div>
         </header>

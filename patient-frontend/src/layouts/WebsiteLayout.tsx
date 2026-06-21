@@ -2,25 +2,48 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Menu, X, ChevronDown, User, Settings, Bell,
-  FileText, HeartPulse, LogOut, Stethoscope,
+  Menu, X, ChevronDown, User, Settings,
+  FileText, LogOut, Stethoscope, CalendarDays,
+  Wallet, Plus,
 } from 'lucide-react';
 import logoIcon from '../assets/branding/medflow_logo_only.png';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../store/authStore';
 import { useLogout } from '../hooks/useAuth';
 import { useMyPatientProfile } from '../hooks/usePatientProfile';
 import { ThemeSwitcher } from '../components/layout/ThemeSwitcher';
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
-import { API_BASE_URL } from '../api/config';
+import { API_BASE_URL, API_ENDPOINTS } from '../api/config';
+import axiosInstance from '../api/axiosInstance';
+import type { ApiResult } from '../types/api.types';
+
+interface WalletBalanceData { balance: number; }
+
+function useWalletBalance() {
+  const { isAuthenticated } = useAuthStore();
+  const { data } = useQuery({
+    queryKey: ['patient-wallet-balance'],
+    queryFn: async () => {
+      const res = await axiosInstance.get<ApiResult<WalletBalanceData>>(
+        API_ENDPOINTS.wallet.balance,
+      );
+      return res.data.data ?? null;
+    },
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  return data?.balance ?? 0;
+}
 
 const navLinks = [
   { to: '/', labelKey: 'nav.home', end: true },
   { to: '/about', labelKey: 'nav.about' },
   { to: '/doctors', labelKey: 'nav.doctors' },
-  { to: '/services', labelKey: 'nav.services' },
+
   { to: '/contact', labelKey: 'nav.contact' },
+  { to: '/feedback', labelKey: 'nav.feedback' },
 ];
 
 // ─── Profile dropdown ─────────────────────────────────────────────────────────
@@ -30,6 +53,8 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
   const { data: profile } = useMyPatientProfile();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const walletBalance = useWalletBalance();
 
   const avatarUrl = profile?.profileImageUrl ? `${API_BASE_URL}${profile.profileImageUrl}` : null;
 
@@ -56,11 +81,10 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
     : '?';
 
   const menuItems = [
-    { icon: User,        labelKey: 'profile.myProfile',      to: '/profile' as string | null },
-    { icon: HeartPulse,  labelKey: 'profile.medicalProfile', to: '/profile' as string | null },
-    { icon: FileText,    labelKey: 'profile.healthRecords',  to: '/profile' as string | null },
-    { icon: Bell,        labelKey: 'profile.notifications',  to: null },
-    { icon: Settings,    labelKey: 'profile.settings',       to: null },
+    { icon: User,         labelKey: 'profile.myProfile',     to: '/profile' as string | null },
+    { icon: CalendarDays, labelKey: 'nav.myAppointments',    to: '/appointments' as string | null },
+    { icon: FileText,     labelKey: 'profile.healthRecords', to: '/health-records' as string | null },
+    { icon: Settings,     labelKey: 'profile.settings',      to: '/settings' as string | null },
   ];
 
   return (
@@ -122,7 +146,7 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
                   {initials}
                 </div>
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate leading-tight">
                   {user?.fullName ?? '—'}
                 </p>
@@ -132,18 +156,40 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
               </div>
             </div>
 
-            {/* Patient badge */}
-            <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+            {/* Wallet balance + Patient badge row */}
+            <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-800/40">
                 <Stethoscope size={11} className="text-cyan-600 dark:text-cyan-400" />
                 <span className="text-[11px] font-semibold text-cyan-700 dark:text-cyan-300 uppercase tracking-wide">
                   {t('auth.patientPortal')}
                 </span>
               </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
+                <Wallet size={11} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                  ₼{walletBalance.toFixed(2)}
+                </span>
+              </div>
             </div>
 
             {/* Menu items */}
             <div className="py-1.5">
+              {/* Add Funds — navigates to /wallet */}
+              <button
+                onClick={() => { setOpen(false); navigate('/wallet'); }}
+                className={cn(
+                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-100',
+                  'text-emerald-600 dark:text-emerald-400',
+                  'hover:bg-emerald-50 dark:hover:bg-emerald-900/15',
+                  'hover:text-emerald-700 dark:hover:text-emerald-300',
+                )}
+              >
+                <Plus size={15} className="shrink-0" />
+                {t('wallet.addFunds')}
+              </button>
+
+              <div className="mx-4 my-1 h-px bg-slate-100 dark:bg-slate-800" />
+
               {menuItems.map(({ icon: Icon, labelKey, to }) => {
                 const cls = cn(
                   'w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-100',
@@ -165,7 +211,7 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
               })}
             </div>
 
-            {/* Sign out — separated */}
+            {/* Sign out */}
             <div className="border-t border-slate-100 dark:border-slate-800 py-1.5">
               <button
                 onClick={() => { setOpen(false); onLogout(); }}
@@ -255,7 +301,7 @@ function Navbar() {
             </div>
 
             {isAuthenticated ? (
-              <div className="hidden sm:block ml-1">
+              <div className="hidden sm:flex items-center gap-1 ml-1">
                 <ProfileDropdown onLogout={logout} />
               </div>
             ) : (
@@ -317,10 +363,9 @@ function Navbar() {
 
               <div className="pt-3 pb-1 border-t border-slate-100 dark:border-slate-800">
                 {isAuthenticated ? (
-                  <>
-                    {/* Mobile user identity */}
-                    <MobileUserRow onLogout={() => { logout(); setMobileOpen(false); }} />
-                  </>
+                  <MobileUserRow
+                    onLogout={() => { logout(); setMobileOpen(false); }}
+                  />
                 ) : (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
@@ -357,6 +402,8 @@ function MobileUserRow({ onLogout }: { onLogout: () => void }) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const { data: profile } = useMyPatientProfile();
+  const navigate = useNavigate();
+  const walletBalance = useWalletBalance();
 
   const initials = user?.fullName
     ? user.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -365,16 +412,15 @@ function MobileUserRow({ onLogout }: { onLogout: () => void }) {
   const avatarUrl = profile?.profileImageUrl ? `${API_BASE_URL}${profile.profileImageUrl}` : null;
 
   const menuItems = [
-    { icon: User,        labelKey: 'profile.myProfile',      to: '/profile' as string | null },
-    { icon: HeartPulse,  labelKey: 'profile.medicalProfile', to: '/profile' as string | null },
-    { icon: FileText,    labelKey: 'profile.healthRecords',  to: '/profile' as string | null },
-    { icon: Bell,        labelKey: 'profile.notifications',  to: null },
-    { icon: Settings,    labelKey: 'profile.settings',       to: null },
+    { icon: User,         labelKey: 'profile.myProfile',     to: '/profile' as string | null },
+    { icon: CalendarDays, labelKey: 'nav.myAppointments',    to: '/appointments' as string | null },
+    { icon: FileText,     labelKey: 'profile.healthRecords', to: '/health-records' as string | null },
+    { icon: Settings,     labelKey: 'profile.settings',      to: '/settings' as string | null },
   ];
 
   return (
     <div className="space-y-1">
-      {/* Identity */}
+      {/* Identity + wallet balance */}
       <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
         {avatarUrl ? (
           <img src={avatarUrl} alt={user?.fullName} className="h-9 w-9 rounded-lg object-cover shrink-0 ring-1 ring-slate-200 dark:ring-slate-700" />
@@ -383,15 +429,30 @@ function MobileUserRow({ onLogout }: { onLogout: () => void }) {
             {initials}
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{user?.fullName ?? '—'}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{user?.email ?? '—'}</p>
         </div>
-        <div className="flex items-center gap-1 ml-auto shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
+            <Wallet size={10} className="text-emerald-600 dark:text-emerald-400" />
+            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+              ₼{walletBalance.toFixed(2)}
+            </span>
+          </div>
           <LanguageSwitcher />
           <ThemeSwitcher />
         </div>
       </div>
+
+      {/* Add Funds — navigates to /wallet */}
+      <button
+        onClick={() => navigate('/wallet')}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/15 transition-colors"
+      >
+        <Plus size={15} className="shrink-0" />
+        {t('wallet.addFunds')}
+      </button>
 
       {/* Menu items */}
       {menuItems.map(({ icon: Icon, labelKey, to }) => {

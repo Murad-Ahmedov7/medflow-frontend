@@ -5,13 +5,19 @@ import logoIcon from '../assets/branding/medflow_logo_only.png';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Users, Stethoscope, Calendar, Building2,
-  Pill, FileText, CreditCard, Settings, LogOut, Menu, X,
-  Bell, ChevronDown, Briefcase, UserPlus, List,
+  Pill, FileText, CreditCard, LogOut, Menu, X,
+  Bell, ChevronDown, UserPlus, List, MessageCircle, Truck, Package, Wallet, MessageSquareMore,
+  ShoppingCart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../store/authStore';
 import { useLogout } from '../hooks/useAuth';
+import { useChatHub } from '../hooks/useChatHub';
+import { useStockHub } from '../hooks/useStockHub';
+import { useMedicineOrderHub } from '../hooks/useMedicineOrderHub';
+import { useBalanceHub } from '../hooks/useBalanceHub';
+import { useMedicineOrderPaymentStore } from '../store/medicineOrderPaymentStore';
 import { ThemeSwitcher } from '../components/layout/ThemeSwitcher';
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
 
@@ -51,22 +57,25 @@ const navGroups: NavGroup[] = [
     labelKey: 'nav.groups.operations',
     items: [
       { to: '/appointments', icon: Calendar, labelKey: 'nav.appointments' },
+      { to: '/chat', icon: MessageCircle, labelKey: 'nav.chat' },
+      { to: '/feedback', icon: MessageSquareMore, labelKey: 'nav.feedback' },
       { to: '/departments', icon: Building2, labelKey: 'nav.departments' },
-      { to: '/services', icon: Briefcase, labelKey: 'nav.services' },
     ],
   },
   {
     labelKey: 'nav.groups.clinical',
     items: [
       { to: '/medicines', icon: Pill, labelKey: 'nav.medicines' },
+      { to: '/suppliers', icon: Truck, labelKey: 'nav.suppliers' },
+      { to: '/stock', icon: Package, labelKey: 'nav.hospitalStock' },
       { to: '/prescriptions', icon: FileText, labelKey: 'nav.prescriptions' },
+      { to: '/medicine-orders', icon: ShoppingCart, labelKey: 'nav.medicineOrders' },
     ],
   },
   {
     labelKey: 'nav.groups.finance',
     items: [
-      { to: '/invoices', icon: FileText, labelKey: 'nav.invoices' },
-      { to: '/payments', icon: CreditCard, labelKey: 'nav.payments' },
+      { to: '/finance', icon: Wallet, labelKey: 'nav.finance' },
     ],
   },
 ];
@@ -133,7 +142,7 @@ function NavItem({ to, icon: Icon, labelKey, end, collapsed, onClick }: {
         className={({ isActive }) =>
           cn(
             'flex items-center rounded-md text-sm font-medium transition-colors duration-100',
-            collapsed ? 'justify-center px-0 py-2.5 mx-1' : 'gap-3 px-3 py-2.5',
+            collapsed ? 'w-10 h-10 justify-center mx-auto' : 'gap-3 px-3 py-2.5',
             isActive
               ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
               : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60'
@@ -169,6 +178,12 @@ function NavItemWithChildren({ item, collapsed, onClose }: {
     if (anyChildActive) setOpen(true);
   }, [anyChildActive]);
 
+  // Close submenu immediately when sidebar collapses so expanded content
+  // never occupies layout space inside the narrow 64px sidebar.
+  useEffect(() => {
+    if (collapsed) setOpen(false);
+  }, [collapsed]);
+
   if (collapsed) {
     // In collapsed mode: show parent icon with tooltip for the group label only
     return (
@@ -179,7 +194,7 @@ function NavItemWithChildren({ item, collapsed, onClose }: {
           onMouseLeave={tooltip.hide}
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            'flex w-full items-center justify-center rounded-md py-2.5 mx-1 transition-colors duration-100',
+            'flex w-10 h-10 items-center justify-center rounded-md mx-auto transition-colors duration-100',
             anyChildActive
               ? 'bg-slate-100 text-cyan-600 dark:bg-slate-800 dark:text-cyan-400'
               : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800/60',
@@ -270,7 +285,7 @@ function SidebarBottomItem({ collapsed, label, icon: Icon, onClick, danger, to }
   const tooltip = useTooltip();
   const itemClass = cn(
     'flex items-center rounded-md text-sm font-medium transition-colors duration-100',
-    collapsed ? 'justify-center px-0 py-2.5 mx-1' : 'gap-3 px-3 py-2.5',
+    collapsed ? 'w-10 h-10 justify-center mx-auto' : 'gap-3 px-3 py-2.5',
     danger
       ? 'text-slate-500 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-900/20'
       : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60',
@@ -290,7 +305,7 @@ function SidebarBottomItem({ collapsed, label, icon: Icon, onClick, danger, to }
           className={({ isActive }) =>
             cn(
               'flex items-center rounded-md text-sm font-medium transition-colors duration-100',
-              collapsed ? 'justify-center px-0 py-2.5 mx-1' : 'gap-3 px-3 py-2.5',
+              collapsed ? 'w-10 h-10 justify-center mx-auto' : 'gap-3 px-3 py-2.5',
               isActive
                 ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60',
@@ -309,7 +324,7 @@ function SidebarBottomItem({ collapsed, label, icon: Icon, onClick, danger, to }
           onClick={onClick}
           ref={collapsed ? (tooltip.ref as React.Ref<HTMLButtonElement>) : undefined}
           {...sharedProps}
-          className={cn('w-full', itemClass)}
+          className={itemClass}
         >
           <Icon size={17} className="shrink-0 text-slate-400 transition-colors duration-100" />
           {!collapsed && <span>{label}</span>}
@@ -325,7 +340,7 @@ function SidebarNav({ collapsed, onClose }: { collapsed: boolean; onClose?: () =
   const logout = useLogout();
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-x-hidden">
       {/* Brand row — same height as topbar so they form one visual band */}
       <div className={cn(
         BAR_H,
@@ -342,7 +357,7 @@ function SidebarNav({ collapsed, onClose }: { collapsed: boolean; onClose?: () =
       </div>
 
       {/* Nav groups */}
-      <nav className={cn('flex-1 overflow-y-auto py-4', collapsed ? 'px-0 space-y-4' : 'px-3 space-y-5')}>
+      <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden py-4', collapsed ? 'px-0 space-y-4' : 'px-3 space-y-5')}>
         {navGroups.map((group) => (
           <div key={group.labelKey}>
             {!collapsed && (
@@ -350,7 +365,7 @@ function SidebarNav({ collapsed, onClose }: { collapsed: boolean; onClose?: () =
                 {t(group.labelKey)}
               </p>
             )}
-            {collapsed && <div className="h-px mx-3 mb-2 bg-slate-100 dark:bg-slate-800 first:hidden" />}
+            {collapsed && <div className="h-px mx-2 mb-2 bg-slate-100 dark:bg-slate-800 first:hidden" />}
             <div className="space-y-0.5">
               {group.items.map((item) =>
                 item.children ? (
@@ -369,7 +384,6 @@ function SidebarNav({ collapsed, onClose }: { collapsed: boolean; onClose?: () =
         'border-t border-slate-100 dark:border-slate-800 py-3 space-y-0.5 shrink-0',
         collapsed ? 'px-0' : 'px-3',
       )}>
-        <SidebarBottomItem collapsed={collapsed} label={t('nav.settings')} icon={Settings} to="/settings" />
         <SidebarBottomItem collapsed={collapsed} label={t('auth.signOut')} icon={LogOut} onClick={logout} danger />
       </div>
     </div>
@@ -383,12 +397,24 @@ export function DashboardLayout() {
   });
   const { user } = useAuthStore();
 
+  // Keep SignalR connected for the entire authenticated session so
+  // NewMessage events arrive regardless of which page the admin is on.
+  useChatHub(user?.id);
+  // Stock hub: real-time hospital stock + medicines updates across all admin tabs.
+  useStockHub();
+  // Medicine order hub: live notifications for new patient medicine orders.
+  useMedicineOrderHub();
+  // Balance hub: live Finance dashboard refresh on any admin/hospital balance change.
+  // On a medicine-order payment specifically, stash it so FinancePage can show the
+  // success modal if (and only if) the admin happens to be on that page right now.
+  useBalanceHub(useMedicineOrderPaymentStore.getState().setPendingPayment);
+
   useEffect(() => {
     try { localStorage.setItem(COLLAPSE_KEY, String(collapsed)); } catch { /* ignore */ }
   }, [collapsed]);
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden" style={{ overflowX: 'hidden' }}>
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden" style={{ overflowX: 'clip' }}>
 
       {/* Desktop sidebar */}
       <motion.aside
@@ -483,8 +509,7 @@ export function DashboardLayout() {
 
           <div className="flex items-center gap-1.5 pr-4">
             <button className="relative flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-cyan-500" />
+            
             </button>
 
             <LanguageSwitcher />
@@ -492,15 +517,14 @@ export function DashboardLayout() {
 
             <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
 
-            <button className="flex items-center gap-2 h-9 pl-2.5 pr-3 rounded-md text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
+            <div className="flex items-center gap-2 select-none">
               <span className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  {user?.fullName?.[0]?.toUpperCase() ?? 'A'}
+                  {(user?.fullName?.[0] ?? user?.email?.[0] ?? 'A').toUpperCase()}
                 </span>
               </span>
-              <span className="hidden sm:block text-sm font-medium max-w-24 truncate">{user?.fullName ?? 'Admin'}</span>
-              <ChevronDown size={14} className="text-slate-400 shrink-0" />
-            </button>
+              <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">{user?.email}</span>
+            </div>
           </div>
         </header>
 

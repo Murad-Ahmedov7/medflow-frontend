@@ -178,6 +178,7 @@ export function DoctorsPage() {
 
       {/* ── Page Header ──────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
+
         <div>
           <div className="flex items-center gap-2.5 mb-1">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-linear-to-br from-cyan-500 to-blue-600 shadow-sm shadow-cyan-200 dark:shadow-cyan-900/50">
@@ -265,7 +266,7 @@ export function DoctorsPage() {
       </div>
 
       {/* ── Toolbar ──────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+      <div className="relative z-10 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-0">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -365,7 +366,7 @@ export function DoctorsPage() {
             initial={{ opacity: 0, height: 0, marginTop: 0 }}
             animate={{ opacity: 1, height: 'auto', marginTop: -8 }}
             exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            className="overflow-hidden"
+            className="relative z-10 overflow-hidden"
           >
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-0">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
@@ -385,7 +386,7 @@ export function DoctorsPage() {
       </AnimatePresence>
 
       {/* ── Table Card ───────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700 overflow-hidden">
+      <div className="relative z-0 mt-2 rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700 overflow-hidden">
 
         {/* Table meta bar */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-700/20">

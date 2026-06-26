@@ -357,7 +357,7 @@ function SidebarNav({ collapsed, onClose }: { collapsed: boolean; onClose?: () =
       </div>
 
       {/* Nav groups */}
-      <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden py-4', collapsed ? 'px-0 space-y-4' : 'px-3 space-y-5')}>
+      <nav className={cn('flex-1 overflow-x-hidden py-4', collapsed ? 'px-0 space-y-4' : 'px-3 space-y-5')}>
         {navGroups.map((group) => (
           <div key={group.labelKey}>
             {!collapsed && (
@@ -414,14 +414,14 @@ export function DashboardLayout() {
   }, [collapsed]);
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden" style={{ overflowX: 'clip' }}>
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950" style={{ overflowX: 'clip' }}>
 
       {/* Desktop sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 64 : 256 }}
         transition={{ type: 'tween', duration: 0.22, ease: 'easeInOut' }}
         style={{ willChange: 'width' }}
-        className="hidden lg:flex shrink-0 flex-col bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-hidden min-w-0"
+        className="hidden lg:flex shrink-0 flex-col bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-y-auto overflow-x-hidden min-w-0 scrollbar-hidden"
       >
         <SidebarNav collapsed={collapsed} />
       </motion.aside>
@@ -443,7 +443,7 @@ export function DashboardLayout() {
               animate={{ x: 0 }}
               exit={{ x: -256 }}
               transition={{ type: 'tween', duration: 0.2, ease: 'easeOut' }}
-              className="fixed left-0 top-0 z-50 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 shadow-lg lg:hidden"
+              className="fixed left-0 top-0 z-50 h-full w-64 overflow-y-auto scrollbar-hidden bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 shadow-lg lg:hidden"
             >
               <SidebarNav collapsed={false} onClose={() => setMobileOpen(false)} />
             </motion.aside>

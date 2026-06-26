@@ -4,21 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Globe, Lock, Eye, EyeOff, Settings } from 'lucide-react';
+import { Lock, Eye, EyeOff, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '../utils/cn';
-import { useTheme } from '../hooks/useTheme';
 import { authService } from '../services/auth.service';
 import { extractErrorMessage, sanitizeApiMessage } from '../utils/errorHandler';
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-const LANGUAGES = [
-  { code: 'en', label: 'English',    flag: '🇬🇧' },
-  { code: 'az', label: 'Azərbaycan', flag: '🇦🇿' },
-  { code: 'ru', label: 'Русский',    flag: '🇷🇺' },
-] as const;
 
 // ── Password form schema ───────────────────────────────────────────────────────
 
@@ -109,84 +100,6 @@ function PasswordInput({
       </div>
       {error && <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">{error}</p>}
     </div>
-  );
-}
-
-// ── Appearance section ─────────────────────────────────────────────────────────
-
-function AppearanceSection() {
-  const { t } = useTranslation();
-  const { theme, setTheme } = useTheme();
-
-  const options = [
-    { value: 'light' as const, label: t('settings.themeLight'), icon: <Sun size={16} /> },
-    { value: 'dark'  as const, label: t('settings.themeDark'),  icon: <Moon size={16} /> },
-  ];
-
-  return (
-    <Section icon={<Sun size={14} />} title={t('settings.sectionAppearance')} delay={0.06}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('settings.theme')}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-            {theme === 'light' ? t('settings.themeLight') : t('settings.themeDark')}
-          </p>
-        </div>
-        <div className="flex gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
-          {options.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setTheme(opt.value)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                theme === opt.value
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-              )}
-            >
-              {opt.icon}
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-// ── Language section ───────────────────────────────────────────────────────────
-
-function LanguageSection() {
-  const { t, i18n } = useTranslation();
-
-  return (
-    <Section icon={<Globe size={14} />} title={t('settings.sectionLanguage')} delay={0.12}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('settings.language')}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-            {LANGUAGES.find(l => l.code === i18n.language)?.label ?? 'English'}
-          </p>
-        </div>
-        <div className="flex gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
-          {LANGUAGES.map(lang => (
-            <button
-              key={lang.code}
-              onClick={() => i18n.changeLanguage(lang.code)}
-              className={cn(
-                'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                i18n.language === lang.code
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-              )}
-            >
-              <span className="text-[13px] leading-none">{lang.flag}</span>
-              <span className="hidden sm:inline">{lang.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </Section>
   );
 }
 
@@ -292,8 +205,6 @@ export function SettingsPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
-        <AppearanceSection />
-        <LanguageSection />
         <PasswordSection />
       </div>
     </div>

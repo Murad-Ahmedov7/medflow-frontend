@@ -48,23 +48,6 @@ export const DOCTOR_AVATARS = [
     dot: 'bg-orange-400',
     ring: 'ring-orange-400/50',
   },
-  {
-    photo: 'https://randomuser.me/api/portraits/women/22.jpg',
-    name: 'Dr. Emily Rodriguez',
-    spec: 'Pediatrician',
-    time: '03:15 PM',
-    dot: 'bg-pink-400',
-    ring: 'ring-pink-400/50',
-  },
-  {
-    photo: 'https://randomuser.me/api/portraits/men/41.jpg',
-    name: 'Dr. David Wilson',
-    spec: 'Ophthalmologist',
-    time: '04:30 PM',
-    dot: 'bg-sky-400',
-    ring: 'ring-sky-400/50',
-  },
-
 ];
 export const SPECIALIST_PHOTOS = [
   'https://randomuser.me/api/portraits/women/26.jpg',
@@ -85,7 +68,7 @@ export function GlassCard({ className, children, delay = 0 }: {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
       className={cn(
-        'rounded-2xl border',
+        'rounded-2xl border overflow-hidden',
         'bg-white/65 border-slate-200/60 shadow-sm',
         'dark:bg-white/6 dark:border-white/10',
         className,
@@ -173,32 +156,11 @@ export function HealthMetricsCard() {
     barCls: 'bg-cyan-500 dark:bg-cyan-400',
   },
   {
-    labelKey: 'auth.panelSleep',
-    value: '7.5',
-    unit: 'hrs',
-    bar: '75%',
-    barCls: 'bg-violet-500 dark:bg-violet-400',
-  },
-  {
     labelKey: 'auth.panelSteps',
     value: '8,420',
     unit: 'steps',
     bar: '84%',
     barCls: 'bg-emerald-500 dark:bg-emerald-400',
-  },
-  {
-    labelKey: 'auth.panelWater',
-    value: '2.1',
-    unit: 'L',
-    bar: '70%',
-    barCls: 'bg-sky-500 dark:bg-sky-400',
-  },
-  {
-    labelKey: 'auth.panelCalories',
-    value: '1,850',
-    unit: 'kcal',
-    bar: '78%',
-    barCls: 'bg-amber-500 dark:bg-amber-400',
   },
 ].map((m) => (
           <div key={m.labelKey}>
@@ -291,7 +253,7 @@ export function DoctorAvatarBadge() {
 //   [    Specialists (full width)      ]
 //
 // At 1920×1080 the content column is the full panel width minus padding.
-// Panel = 57% × 1920 = 1094px, px-10 = 40px each side → 1014px usable.
+// Panel = 56% × 1920 = 1075px, px-14 = 56px each side → 963px usable.
 // No max-w cap — we use all available horizontal space like the reference.
 //
 export function AuthLeftPanel({ titleKey, headingKey }: { titleKey: string; headingKey: string }) {
@@ -448,7 +410,7 @@ export function AuthFormPanel({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="w-full max-w-100 xl:max-w-110 2xl:max-w-122.5"
+            className="w-full max-w-100 xl:max-w-115 2xl:max-w-130"
           >
             {children}
           </motion.div>
@@ -463,7 +425,7 @@ export function AuthCard({ children }: { children: React.ReactNode }) {
   return (
     <div className={cn(
       'rounded-2xl',
-      'px-6 sm:px-8 xl:px-9 py-7 sm:py-8 xl:py-9',
+      'px-6 sm:px-8 xl:px-9 2xl:px-10 py-7 sm:py-8 xl:py-9 2xl:py-10',
       'bg-white border border-slate-100 shadow-lg shadow-slate-200/50',
       'dark:bg-[#0f1623] dark:border-white/6 dark:shadow-xl dark:shadow-black/30',
     )}>
@@ -522,7 +484,7 @@ export function AuthPageRoot({ leftTitleKey, leftHeadingKey, children }: {
 }) {
   return (
     <div className="h-screen w-screen flex overflow-hidden">
-      <div className="lg:w-[55%] xl:w-[58%] 2xl:w-[60%] shrink-0 h-full">
+      <div className="lg:w-[52%] xl:w-[54%] 2xl:w-[56%] shrink-0 h-full">
         <AuthLeftPanel titleKey={leftTitleKey} headingKey={leftHeadingKey} />
       </div>
       <AuthFormPanel>
@@ -579,7 +541,7 @@ export function TaskCard({ children }: { children: React.ReactNode }) {
   return (
     <div className={cn(
       'rounded-2xl xl:rounded-3xl',
-      'px-7 sm:px-10 xl:px-11 py-8 sm:py-10 xl:py-11',
+      'px-7 sm:px-10 xl:px-11 2xl:px-12 py-8 sm:py-10 xl:py-11 2xl:py-12',
       'bg-white border border-slate-100 shadow-lg shadow-slate-200/50',
       'dark:bg-[#0f1623] dark:border-white/6 dark:shadow-xl dark:shadow-black/30',
     )}>

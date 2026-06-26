@@ -469,7 +469,8 @@ function AppointmentCard({
   const { t, i18n } = useTranslation();
   const age    = calcAge(appt.patientBirthDate);
   const gender = appt.patientGender;
-  // A consultation can only be started on its scheduled date — never early.
+  // A consultation can be started any time on or after its scheduled date — only
+  // blocked while that date is still in the future. Time-of-day is ignored entirely.
   // Backend enforces this too; this just keeps the doctor from hitting that error.
   const isFutureAppointment = appt.appointmentDate > todayIso();
 

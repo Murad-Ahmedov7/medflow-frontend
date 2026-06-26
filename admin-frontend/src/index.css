@@ -58,6 +58,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -71,6 +76,24 @@
   }
 
   #root {
-    min-height: 100vh;
+    height: 100%;
   }
+}
+
+.scrollbar-hidden {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-hidden::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-hidden::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+.dark .scrollbar-hidden::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5);
 }

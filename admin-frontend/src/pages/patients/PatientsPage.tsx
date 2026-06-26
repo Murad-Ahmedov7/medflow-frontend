@@ -214,7 +214,7 @@ export function PatientsPage() {
       let cmp = 0;
       if (sortBy === 'name')          cmp = fullName(a).localeCompare(fullName(b));
       else if (sortBy === 'phone')    cmp = a.phone.localeCompare(b.phone);
-      else if (sortBy === 'gender')   cmp = a.gender.localeCompare(b.gender);
+      else if (sortBy === 'gender')   cmp = (a.gender ?? '').localeCompare(b.gender ?? '');
       else if (sortBy === 'appointments') cmp = a.appointmentCount - b.appointmentCount;
       else if (sortBy === 'prescriptions') cmp = a.prescriptionCount - b.prescriptionCount;
       else if (sortBy === 'createdAt') cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
